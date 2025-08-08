@@ -34,6 +34,7 @@ class BgeM3EmbeddingService:
         self.embedding_model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True)
 
     def embed_texts(self, texts: list[str], return_dense: bool = True, return_sparse: bool = True) -> EmbeddingResult:
+        print(texts)
         embeddings = self.embedding_model.encode(
             texts,
             batch_size=50,
