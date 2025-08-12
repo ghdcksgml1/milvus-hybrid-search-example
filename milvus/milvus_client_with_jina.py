@@ -9,7 +9,7 @@ from pymilvus import (
     WeightedRanker, MilvusException
 )
 from embedding.embedding_result import EmbeddingResult
-from embedding.bge_m3_embedding import BgeM3EmbeddingService
+from embedding.jina_v3_embedding import JinaV3EmbeddingService
 
 connections.connect(uri="http://home-server:19530", token="root:Milvus")
 
@@ -23,7 +23,7 @@ fields = [
 ]
 schema = CollectionSchema(fields=fields)
 
-collection_name = "bge_m3_hybrid_search"
+collection_name = "jina_v3_hybrid_search"
 col = Collection(collection_name, schema, using="default")
 sparse_index = {"index_type": "SPARSE_INVERTED_INDEX", "metric_type": "IP"}
 col.create_index("sparse_vector", index_params=sparse_index)
@@ -34,8 +34,8 @@ dense_index = {
 col.create_index("dense_vector", index_params=dense_index)
 col.load()
 
-class MilvusService:
-    def __init__(self, embedding_model: BgeM3EmbeddingService):
+class JinaMilvusService:
+    def __init__(self, embedding_model: JinaV3EmbeddingService):
         self.client = connections
         self.embedding_model = embedding_model
 
@@ -58,8 +58,8 @@ class MilvusService:
             print(f"Error inserting data into Milvus: {e}")
             raise HTTPException(status_code=500, detail="Error inserting data into Milvus")
 
-    def hybrid_search(self, query: str, dense_weight: float = 1.0, sparse_weight: float = 1.0, top_k: int = 10):
-        query_embedding = self.embedding_model.embed_texts([query])
+    def hybrid_search(self, embedding_result: EmbeddingResult, dense_weight: float = 1.0, sparse_weight: float = 1.0, top_k: int = 10):
+        query_embedding = embedding_result
         dense_search_params = {
             "metric_type": "IP",
             "params": {},
